@@ -1,0 +1,32 @@
+name: Netatmo to InfluxDB Cronjob
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # Alle 10 Minuten
+
+jobs:
+  runCronjob:
+    runs-on: ubuntu-latest  # Der Cronjob wird auf einer Ubuntu-Umgebung ausgeführt
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2  # Repository auschecken, damit das Skript verfügbar ist
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Setze die Node.js-Version (optional anpassen)
+
+      - name: Install Dependencies
+        run: |
+          npm install dotenv @influxdata/influxdb-client node-fetch  # Installiere Abhängigkeiten
+
+      - name: Run Netatmo to InfluxDB Script
+        run: |
+          node netatmo_to_influxdb.js  # Führe das Skript aus
+
+        env:
+          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+          INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
+          INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
+          NETATMO_ACCESS_TOKEN: ${{ secrets.NETATMO_ACCESS_TOKEN }}
