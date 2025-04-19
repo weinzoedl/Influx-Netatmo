@@ -1,32 +1,36 @@
-name: Netatmo to InfluxDB Cronjob
+name: Run Netatmo to InfluxDB Script
 
 on:
   schedule:
     - cron: '*/10 * * * *'  # Alle 10 Minuten
+  workflow_dispatch:        # Manueller Start via GitHub
 
 jobs:
-  runCronjob:
-    runs-on: ubuntu-latest  # Der Cronjob wird auf einer Ubuntu-Umgebung ausgeführt
+  run-script:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: netatmo-to-influx  # Wechsle in den Ordner mit dem Script
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2  # Repository auschecken, damit das Skript verfügbar ist
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '14'  # Setze die Node.js-Version (optional anpassen)
+          node-version: 20
 
-      - name: Install Dependencies
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create .env file from secrets
         run: |
-          npm install dotenv @influxdata/influxdb-client node-fetch  # Installiere Abhängigkeiten
+          echo "INFLUXDB_TOKEN=${{ secrets.INFLUXDB_TOKEN }}" >> .env
+          echo "INFLUXDB_ORG=${{ secrets.INFLUXDB_ORG }}" >> .env
+          echo "INFLUXDB_BUCKET=${{ secrets.INFLUXDB_BUCKET }}" >> .env
+          echo "NETATMO_ACCESS_TOKEN=${{ secrets.NETATMO_ACCESS_TOKEN }}" >> .env
 
-      - name: Run Netatmo to InfluxDB Script
-        run: |
-          node netatmo_to_influxdb.js  # Führe das Skript aus
-
-        env:
-          INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
-          INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
-          INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
-          NETATMO_ACCESS_TOKEN: ${{ secrets.NETATMO_ACCESS_TOKEN }}
+      - name: Run netatmo_to_influxdb.js
+        run: node netatmo_to_influxdb.js
