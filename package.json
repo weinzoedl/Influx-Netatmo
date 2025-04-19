@@ -1,0 +1,14 @@
+{
+    "name": "netatmo-to-influxdb",
+    "version": "1.0.0",
+    "main": "netatmo_to_influxdb.js",
+    "scripts": {
+      "start": "node netatmo_to_influxdb.js"
+    },
+    "dependencies": {
+      "@influxdata/influxdb-client": "^1.28.0",
+      "dotenv": "^16.0.0",
+      "node-fetch": "^3.3.2"
+    },
+    "type": "module"
+  }
